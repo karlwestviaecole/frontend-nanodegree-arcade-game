@@ -1,19 +1,36 @@
 class Enemy {
-    
+
     constructor() {
-        this.x = getRandomInt(-300, -100);
-        this.y = enemyLanes[getRandomInt(0, enemyLanes.length)];
-        this.speed = getRandomInt(100, 300);
+        this.xMax = board.xMax;
+        this.offsetTop = -22;
         this.sprite = 'images/enemy-bug.png';
+        this.width = board.colWidth;
+        this.height = board.rowHeight;
+        Enemy.reset(this);
+    }
+
+    get visualX() {
+        return this.x;
+    }
+
+    get visualY() {
+        return this.y - this.offsetTop;
+    }
+
+    static reset(enemy) {
+        enemy.x = getRandomInt(-300, -100);
+        enemy.y = board.rowY(getRandomInt(1, board.numRows)) + enemy.offsetTop;
+        enemy.speed = getRandomInt(100, 300);
     }
 
     update(dt) {
-        if (this.x > 600) {
-            this.x = getRandomInt(-300, -100);
-            this.y = enemyLanes[getRandomInt(0, enemyLanes.length)];
-            this.speed = getRandomInt(100, 300);
+        if (this.x > this.xMax) {
+            Enemy.reset(this);
         } else {
             this.x += dt * this.speed;
+        }
+        if (collides(this, player)) {
+           console.log('collision');
         }
     }
 
@@ -25,12 +42,57 @@ class Enemy {
 class Player {
 
     constructor() {
-        this.x = 200;
-        this.y = 404;
+        this.offsetTop = -10;
         this.sprite = 'images/char-boy.png';
+        this.xMin = board.xMin;
+        this.yMin = board.yMin + this.offsetTop;
+        this.xMax = board.xMax - board.colWidth;
+        this.yMax = board.yMax - board.rowHeight + this.offsetTop;
+        this.width = board.colWidth;
+        this.height = board.rowHeight;
+        Player.reset(this);
     }
 
-    update() { 
+    get visualX() {
+        return this.x;
+    }
+
+    get visualY() {
+        return this.y - this.offsetTop;
+    }
+
+    static reset(player) {
+        player.x = board.colX(3);
+        player.y = board.rowY(board.numRows) + player.offsetTop;
+        player.move = null;
+    }
+
+    update() {
+        if (this.move) {
+            switch (this.move) {
+                case 'left':
+                    if (this.x - board.colWidth >= this.xMin) {
+                        this.x -= board.colWidth;
+                    }
+                    break;
+                case 'up':
+                    if ((this.y - board.rowHeight) >= this.yMin) {
+                        this.y -= board.rowHeight;
+                    }
+                    break;
+                case 'right':
+                    if (this.x + board.colWidth <= this.xMax) {
+                        this.x += board.colWidth;
+                    }
+                    break;
+                case 'down':
+                    if ((this.y + board.rowHeight) <= this.yMax) {
+                        this.y += board.rowHeight;
+                    }
+                    break;
+            }
+            this.move = null;
+        }
     }
 
     render() {
@@ -38,24 +100,37 @@ class Player {
     }
 
     handleInput(key) {
-        switch (key) {
-            case 'left':
-                this.x -= 100;
-                break;
-            case 'up':
-                this.y -= 83;
-                break;
-            case 'right':
-                this.x += 100;
-                break;
-            case 'down':
-                this.y += 83;
-                break;
-        }
+        this.move = key;
     }
 }
 
-const enemyLanes = [-20, 62, 146, 230, 310, 400];
+const board = (function () {
+
+    const xMin = 0;
+    const yMin = 0;
+    const colWidth = 101;
+    const rowHeight = 83;
+    const numCols = 5;
+    const numRows = 6;
+    const xMax = (() => xMin + numCols * colWidth)();
+    const yMax = (() => yMin + numRows * rowHeight)();
+    const colX = col => (col - 1) * colWidth;
+    const rowY = row => (row - 1) * rowHeight;
+
+    return {
+        'xMin': xMin,
+        'yMin': yMin,
+        'colWidth': colWidth,
+        'rowHeight': rowHeight,
+        'numCols': numCols,
+        'numRows': numRows,
+        'xMax': xMax,
+        'yMax': yMax,
+        'colX': colX,
+        'rowY': rowY
+    };
+
+})();
 
 const allEnemies = (function () {
     var numberOfEnemies = 3;
@@ -79,10 +154,16 @@ document.addEventListener('keyup', function (e) {
     player.handleInput(allowedKeys[e.keyCode]);
 });
 
-// Function from MDN
+const collides = function (a, b) {
+    if (a.visualX < b.visualX + b.width &&
+        a.visualX + a.width > b.visualX &&
+        a.visualY < b.visualY + b.height &&
+        a.visualY + a.height > b.visualY) return true;
+}
+
 // min is inclusive and max is exclusive
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min; 
+    return Math.floor(Math.random() * (max - min)) + min;
 }
