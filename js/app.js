@@ -30,7 +30,7 @@ class Enemy {
             this.x += dt * this.speed;
         }
         if (collides(this, player)) {
-           console.log('collision');
+           Player.reset(player);
         }
     }
 
