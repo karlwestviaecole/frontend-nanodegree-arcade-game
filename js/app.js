@@ -63,7 +63,7 @@ class Enemy {
      */
     static reset(enemy) {
         enemy.x = getRandomInt(-300, -100); // simulate randow delay before entering the game again
-        enemy.y = board.rowY(getRandomInt(1, board.numRows)) + enemy.spriteTopOffset; // random row
+        enemy.y = board.rowY(getRandomInt(2, board.numRows)) + enemy.spriteTopOffset; // random row
         enemy.speed = getRandomInt(100, 300);
     }
 
