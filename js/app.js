@@ -93,7 +93,7 @@ class Player {
             }
             this.move = null;
         }
-        if(this.y === this.yMin) {
+        if (this.y === this.yMin) {
             Player.reset(this);
         }
     }
