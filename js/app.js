@@ -107,7 +107,7 @@ class Enemy {
 }
 
 /**
- * The Enemy class
+ * The Player class
  */
 class Player {
 
