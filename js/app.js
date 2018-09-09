@@ -30,7 +30,7 @@ class Enemy {
             this.x += dt * this.speed;
         }
         if (collides(this, player)) {
-           Player.reset(player);
+            Player.reset(player);
         }
     }
 
@@ -92,6 +92,9 @@ class Player {
                     break;
             }
             this.move = null;
+        }
+        if(this.y === this.yMin) {
+            Player.reset(this);
         }
     }
 
